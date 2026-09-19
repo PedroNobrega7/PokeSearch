@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PokeSearch</title>
+
+  <!-- Fontes importadas conforme a especificação (Space Grotesk e Plus Jakarta Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+ <link rel="icon" href="img/favicon-16x16.png">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Decoração de fundo: pokébolas bem sutis, só pra dar a "pegada" pokémon -->
+  <div class="bg-decoration" aria-hidden="true"></div>
+
+  <!-- ===================================================== -->
+  <!-- TELA 1: BUSCA (aparece primeiro, sem nenhum pokémon)  -->
+  <!-- ===================================================== -->
+  <main id="search-screen" class="screen search-wrapper">
+    <!-- Título Principal -->
+    <div class="brand-header">
+      <h1 class="display-title">
+        <!--
+          LOGO / SÍMBOLO DO SITE
+          Por enquanto é um placeholder em SVG (uma pokébola simples) para não
+          quebrar o layout. Quando você tiver a imagem final, é só trocar a
+          tag <img> abaixo pela sua, ex:
+          <img src="img/logo.png" alt="Logo Pokédex" class="pokeball-icon">
+        -->
+        <img
+          src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23fff' stroke='%23171c21' stroke-width='4'/%3E%3Cpath d='M4 50h92' stroke='%23171c21' stroke-width='4'/%3E%3Cpath d='M4 50a46 46 0 0 1 92 0z' fill='%23bc0007'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23fff' stroke='%23171c21' stroke-width='4'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23f0f4fb'/%3E%3C/svg%3E"
+          alt="Logo PokeSearch (placeholder)"
+          id="site-logo"
+          class="pokeball-icon"
+          title="Clique para trocar de bola"
+        >
+        PokeSearch
+      </h1>
+      <p class="brand-subtitle">Encontre qualquer Pokémon em segundos</p>
+    </div>
+
+    <!-- Container da Barra de Pesquisa Estilo Chat -->
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <div class="search-input-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            id="pokemon-search"
+            placeholder="Procure por um Pokémon (ex: Pikachu, Charizard, #0006)..."
+            autocomplete="off"
+          >
+          <button id="search-btn" class="btn-primary" aria-label="Buscar">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Lista de sugestões (autocomplete) -->
+        <ul id="autocomplete-list" class="autocomplete-list hidden"></ul>
+      </div>
+
+      <!-- Ações rápidas / Filtros embaixo do chat -->
+      <div class="quick-filters">
+        <button class="filter-chip active" data-filter="all">Todos</button>
+        <button class="filter-chip" data-filter="types">Tipos</button>
+        <button class="filter-chip" data-filter="legendary">Lendários</button>
+        <button class="filter-chip" data-filter="pseudo-legendary">Pseudolendários</button>
+        <button class="filter-chip" data-filter="starters">Iniciais</button>
+      </div>
+    </div>
+
+    <!-- Modal/Menu expansível de Tipos (Inicialmente Oculto) -->
+    <div id="types-dropdown" class="types-grid hidden">
+      <span class="type-badge normal">Normal</span>
+      <span class="type-badge fire">Fire</span>
+      <span class="type-badge water">Water</span>
+      <span class="type-badge grass">Grass</span>
+      <span class="type-badge electric">Electric</span>
+      <span class="type-badge ice">Ice</span>
+      <span class="type-badge fighting">Fighting</span>
+      <span class="type-badge poison">Poison</span>
+      <span class="type-badge ground">Ground</span>
+      <span class="type-badge flying">Flying</span>
+      <span class="type-badge psychic">Psychic</span>
+      <span class="type-badge bug">Bug</span>
+      <span class="type-badge rock">Rock</span>
+      <span class="type-badge ghost">Ghost</span>
+      <span class="type-badge dragon">Dragon</span>
+      <span class="type-badge dark">Dark</span>
+      <span class="type-badge steel">Steel</span>
+      <span class="type-badge fairy">Fairy</span>
+    </div>
+  </main>
+
+  <!-- ===================================================== -->
+  <!-- TELA 2: RESULTADO (aparece depois de pesquisar)       -->
+  <!-- ===================================================== -->
+  <main id="result-screen" class="screen result-wrapper hidden">
+    <button id="back-btn" class="btn-back" aria-label="Voltar para a busca">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Voltar
+    </button>
+
+    <div id="pokemon-card" class="pokemon-card">
+      <div class="card-top">
+        <img id="pokemon-sprite" class="pokemon-image" src="" alt="">
+      </div>
+
+      <div class="card-body">
+        <div class="card-header">
+          <h2 id="pokemon-name"></h2>
+          <span id="pokemon-id"></span>
+        </div>
+
+        <div id="pokemon-types" class="pokemon-types"></div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">Altura</span>
+            <span class="stat-value"><span id="pokemon-height"></span> m</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Peso</span>
+            <span class="stat-value"><span id="pokemon-weight"></span> kg</span>
+          </div>
+          <div class="stat-box stat-box-wide">
+            <span class="stat-label">Habilidades</span>
+            <span class="stat-value" id="pokemon-abilities"></span>
+          </div>
+        </div>
+
+        <div class="base-stats">
+          <span class="stat-label">Estatísticas Base</span>
+          <div id="pokemon-stats" class="stats-list"></div>
+        </div>
+
+        <!-- Efetividade de tipo: o que ele bate forte/fraco e do que ele toma mais/menos dano.
+             Os dados vêm do endpoint /type/ da PokeAPI; se a busca falhar por qualquer motivo,
+             a seção inteira fica escondida (ver script.js). -->
+        <div id="type-matchups" class="type-matchups hidden">
+          <span class="stat-label">Efetividade de Tipo</span>
+          <div class="matchup-grid">
+            <div class="matchup-col">
+              <span class="matchup-col-title">Bate forte em</span>
+              <div id="matchup-attack-strong" class="matchup-badges"></div>
+            </div>
+            <div class="matchup-col">
+              <span class="matchup-col-title">Bate fraco em</span>
+              <div id="matchup-attack-weak" class="matchup-badges"></div>
+            </div>
+            <div class="matchup-col">
+              <span class="matchup-col-title">Toma mais dano de</span>
+              <div id="matchup-defense-weak" class="matchup-badges"></div>
+            </div>
+            <div class="matchup-col">
+              <span class="matchup-col-title">Resiste a</span>
+              <div id="matchup-defense-resist" class="matchup-badges"></div>
+            </div>
+            <div id="matchup-defense-immune-wrap" class="matchup-col matchup-col-wide hidden">
+              <span class="matchup-col-title">Imune a</span>
+              <div id="matchup-defense-immune" class="matchup-badges"></div>
+            </div>
+          </div>
+        </div>
+
+        <button id="cry-btn" class="btn-cry" style="display: none;">🔊 Ouvir Grito</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
